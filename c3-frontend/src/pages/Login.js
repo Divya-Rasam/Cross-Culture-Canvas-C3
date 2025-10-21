@@ -26,18 +26,23 @@ const Login = () => {
     setErrors({});
     
     try {
-      // For now, we'll just check if the user exists
-      const response = await axios.get(`http://localhost:8080/api/auth/check-username/${formData.username}`);
+      const response = await axios.post('http://localhost:8080/api/auth/signin', formData);
       
-      if (response.data.available) {
-        setErrors({ general: 'User not found' });
-      } else {
-        // For demo purposes, we'll just show success
-        alert('Login successful! (Demo mode - actual authentication coming soon)');
-        navigate('/');
-      }
+      // Store JWT token in localStorage
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify({
+        username: response.data.username,
+        role: response.data.role
+      }));
+      
+      alert('Login successful!');
+      navigate('/');
     } catch (error) {
-      setErrors({ general: 'Login failed. Please check your credentials.' });
+      if (error.response?.data?.error) {
+        setErrors({ general: error.response.data.error });
+      } else {
+        setErrors({ general: 'Login failed. Please check your credentials.' });
+      }
     } finally {
       setLoading(false);
     }
