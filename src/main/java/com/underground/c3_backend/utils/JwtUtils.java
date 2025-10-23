@@ -24,14 +24,15 @@ public class JwtUtils {
     private int jwtExpirationMs;
 
     private SecretKey getSigningKey() {
-        // Create a secure key from the secret string
+        // Use the recommended method to generate a secure key
         byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
-        // Ensure the key is at least 256 bits (32 bytes) for HS512
-        if (keyBytes.length < 32) {
-            // If the key is too short, pad it or use a default secure key
-            String defaultSecret = "c3SecretKeyc3SecretKeyc3SecretKeyc3SecretKey"; // 32+ characters
-            keyBytes = defaultSecret.getBytes(StandardCharsets.UTF_8);
+        
+        // If the key is too short, create a secure one
+        if (keyBytes.length < 64) { // 64 bytes = 512 bits
+            // Generate a secure key using the recommended method
+            return Keys.secretKeyFor(SignatureAlgorithm.HS512);
         }
+        
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Container, Card, Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -26,18 +28,20 @@ const Login = () => {
     setErrors({});
     
     try {
+      console.log('Login - Attempting login with:', formData);
       const response = await axios.post('http://localhost:8080/api/auth/signin', formData);
+      console.log('Login - Response received:', response.data);
       
-      // Store JWT token in localStorage
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify({
+      // Use the login function from AuthContext
+      login({
         username: response.data.username,
         role: response.data.role
-      }));
+      }, response.data.token);
       
-      alert('Login successful!');
+      console.log('Login - AuthContext login called');
       navigate('/');
     } catch (error) {
+      console.error('Login - Error:', error);
       if (error.response?.data?.error) {
         setErrors({ general: error.response.data.error });
       } else {
